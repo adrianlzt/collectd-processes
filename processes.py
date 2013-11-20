@@ -48,8 +48,8 @@ def read_processes(data=None):
     stat = file("/proc/"+dir+"/stat").read().split(" ")
 
     # Time, in seconds
-    utime = stat[stat_map.get('utime')-1] / jiffpersec
-    stime = stat[stat_map.get('stime')-1] / jiffpersec
+    utime = int(stat[stat_map.get('utime')-1]) / jiffpersec
+    stime = int(stat[stat_map.get('stime')-1]) / jiffpersec
     vl = collectd.Values(type='ps_cputime')
     vl.dispatch(plugin=plugin_name, plugin_instance=dir, values=[utime,stime])
 
