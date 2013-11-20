@@ -58,10 +58,24 @@ def read_processes(data=None):
     vl.dispatch(plugin=plugin_name, plugin_instance=dir, values=[accutime])
 
     # Threads
+    threads = stat[stat_map.get('num_threads')-1]
+    vl = collectd.Values(type='threads')
+    vl.dispatch(plugin=plugin_name, plugin_instance=dir, values=[threads])
 
     # Page faults
+    min_flt = stat[stat_map.get('min_flt')-1]
+    maj_flt = stat[stat_map.get('maj_flt')-1]
+    vl = collectd.Values(type='ps_pagefaults')
+    vl.dispatch(plugin=plugin_name, plugin_instance=dir, values=[min_flt,maj_flt])
 
-    # Memory (VSZ,RSS) percentage?
+    # Memory (VSZ,RSS)
+    rss = stat[stat_map.get('RSS')-1]
+    vl = collectd.Values(type='ps_rss')
+    vl.dispatch(plugin=plugin_name, plugin_instance=dir, values=[rss])
+
+    vsz = stat[stat_map.get('VSZ')-1]
+    vl = collectd.Values(type='ps_vm')
+    vl.dispatch(plugin=plugin_name, plugin_instance=dir, values=[vsz])
 
   # Aggregated data by comm?
 
