@@ -1,8 +1,20 @@
 import collectd
 import os,re
 
-# global variables
+plugin_name = "processes"
 
+# https://www.kernel.org/doc/Documentation/filesystems/proc.txt
+# name: position
+stat_map = {
+    'min_flt':     10,
+    'maj_flt':     12,
+    'utime':       14,
+    'stime':       15,
+    'num_threads': 20,
+    'VSZ':         23,
+    'RSS':         24,
+    'blkio_ticks': 42
+}
 
 # True if dir is only numbers
 def ispid(dir):
@@ -26,9 +38,17 @@ def read_processes(data=None):
     read_bytes = re.search('(?<=read_bytes: ).*',io).group(0)
     write_bytes = re.search('(?<=write_bytes: ).*',io).group(0)
     vl = collectd.Values(type='io_octets')
-    vl.dispatch(plugin="procv2",plugin_instance=dir, values=[read_bytes,write_bytes])
+    vl.dispatch(plugin=plugin_name,plugin_instance=dir, values=[read_bytes,write_bytes])
+
+    # Stat
+    # stat array start in 0, but stat_map start in 0, so -1 it is needed
+    stat = file("/proc/"+dir+"/stat").read().split(" ")
 
     # Time
+    utime = stat[stat_map.get('utime')-1]
+    stime = stat[stat_map.get('stime')-1]
+    vl = collectd.Values(type='ps_cputime')
+    vl.dispatch(plugin=plugin_name,plugin_instance=dir, values=[utime,stime])
 
     # Threads
 
