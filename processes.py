@@ -3,6 +3,9 @@ import os,re
 
 plugin_name = "processes"
 
+# http://www.unix.com/man-page/linux/7/time/
+jiffpersec = os.sysconf(os.sysconf_names['SC_CLK_TCK'])
+
 # https://www.kernel.org/doc/Documentation/filesystems/proc.txt
 # name: position
 stat_map = {
@@ -38,17 +41,21 @@ def read_processes(data=None):
     read_bytes = re.search('(?<=read_bytes: ).*',io).group(0)
     write_bytes = re.search('(?<=write_bytes: ).*',io).group(0)
     vl = collectd.Values(type='io_octets')
-    vl.dispatch(plugin=plugin_name,plugin_instance=dir, values=[read_bytes,write_bytes])
+    vl.dispatch(plugin=plugin_name, plugin_instance=dir, values=[read_bytes,write_bytes])
 
     # Stat
     # stat array start in 0, but stat_map start in 0, so -1 it is needed
     stat = file("/proc/"+dir+"/stat").read().split(" ")
 
-    # Time
-    utime = stat[stat_map.get('utime')-1]
-    stime = stat[stat_map.get('stime')-1]
+    # Time, in seconds
+    utime = stat[stat_map.get('utime')-1] / jiffpersec
+    stime = stat[stat_map.get('stime')-1] / jiffpersec
     vl = collectd.Values(type='ps_cputime')
-    vl.dispatch(plugin=plugin_name,plugin_instance=dir, values=[utime,stime])
+    vl.dispatch(plugin=plugin_name, plugin_instance=dir, values=[utime,stime])
+
+    accutime = (utime + stime) / jiffpersec
+    vl = collectd.Values(type='ps_time')
+    vl.dispatch(plugin=plugin_name, plugin_instance=dir, values=[accutime])
 
     # Threads
 
