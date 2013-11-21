@@ -1,0 +1,9 @@
+Tal como está ahora, el proceso sobrecarga el pc, y llena el espacio en disco al intentar escribir todas las métricas.
+
+Probar a aumentar el tiempo entre toma de muestras.
+
+Hacer pruebas también restringiendo el número de pids (los que acaben solo en 3, por ejemplo)
+
+Hay que capturar incidencias en caso de que no se pueda abrir un fichero.
+
+Comprobar cuanto tiempo tarda en capturar todos los datos del proc entero.
